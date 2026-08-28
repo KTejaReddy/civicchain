@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+model User {
+  id           String   @id @default(uuid())
+  walletAddress String  @unique
+  did          String   @unique @default(uuid())
+  name         String?
+  email        String?
+  role         String   @default("VOLUNTEER")
+  isVerified   Boolean  @default(false)
+  badge        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  organization         Organization?
+  contributions        Contribution[]
+  votes                Vote[]
+  proposalVotes        ProposalVote[]
+  createdProposals     Proposal[]
+  validatorAssignments ValidatorAssignment[]
+}
+
+model Organization {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?
+  walletAddress String   @unique
+  userId        String   @unique
+  createdAt     DateTime @default(now())
+
+  user     User       @relation(fields: [userId], references: [id])
+  campaigns Campaign[]
+}
+
+model Campaign {
+  id             String         @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  date           DateTime?
+  location       String?
+  status         String @default("ACTIVE")
+  createdAt      DateTime       @default(now())
+
+  organization  Organization   @relation(fields: [organizationId], references: [id])
+  contributions Contribution[]
+}
+
+model Contribution {
+  id          String             @id @default(uuid())
+  campaignId  String
+  userId      String
+  hours       Float
+  description String?
+  proofUrl    String?
+  location    String?
+  status      String @default("PENDING")
+  blockHash   String?
+  createdAt   DateTime           @default(now())
+
+  campaign              Campaign              @relation(fields: [campaignId], references: [id])
+  user                  User                  @relation(fields: [userId], references: [id])
+  votes                 Vote[]
+  validatorAssignments  ValidatorAssignment[]
+}
+
+model Vote {
+  id             String   @id @default(uuid())
+  contributionId String
+  validatorId    String
+  vote           String
+  comment        String?
+  createdAt      DateTime @default(now())
+
+  contribution Contribution @relation(fields: [contributionId], references: [id])
+  validator    User         @relation(fields: [validatorId], references: [id])
+
+  @@unique([contributionId, validatorId])
+}
+
+model Proposal {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  status      String @default("ACTIVE")
+  createdById String
+  createdAt   DateTime       @default(now())
+  endDate     DateTime?
+
+  createdBy    User          @relation(fields: [createdById], references: [id])
+  proposalVotes ProposalVote[]
+}
+
+model ProposalVote {
+  id         String           @id @default(uuid())
+  proposalId String
+  userId     String
+  vote       String
+  createdAt  DateTime         @default(now())
+
+  proposal Proposal @relation(fields: [proposalId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+
+  @@unique([proposalId, userId])
+}
+
+model ValidatorAssignment {
+  id             String   @id @default(uuid())
+  contributionId String
+  validatorId    String
+  assignedAt     DateTime @default(now())
+
+  contribution Contribution @relation(fields: [contributionId], references: [id])
+  validator    User         @relation(fields: [validatorId], references: [id])
+
+  @@unique([contributionId, validatorId])
+}

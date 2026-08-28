@@ -1,0 +1,22 @@
+{
+  "name": "civicchain-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for CivicChain - Sybil-resistant DAO",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:sepolia": "hardhat run scripts/deploy.ts --network sepolia"
+  },
+  "devDependencies": {
+    "hardhat": "^2.20.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "chai": "^4.3.0",
+    "ethers": "^6.0.0",
+    "dotenv": "^16.0.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.0"
+  }
+}
